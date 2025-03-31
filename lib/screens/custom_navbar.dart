@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_libreria/screens/Busqueda_screen.dart';
 import 'package:proyecto_libreria/screens/Home_screen.dart';
+import 'package:proyecto_libreria/screens/perfil_usuario.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
