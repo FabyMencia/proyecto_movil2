@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_libreria/screens/Busqueda_screen.dart';
 import 'package:proyecto_libreria/screens/Home_screen.dart';
+import 'package:proyecto_libreria/screens/LoginScreen.dart';
 
 class menu extends StatelessWidget {
   const menu({Key? key}) : super(key: key);
@@ -37,6 +38,18 @@ class menu extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => Busqueda_screen(),
                       ),
+                    ),
+                  },
+            ),
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              child: Text("Login"),
+              onPressed:
+                  () => {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
                     ),
                   },
             ),

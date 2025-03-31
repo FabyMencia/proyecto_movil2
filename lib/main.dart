@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_libreria/screens/LoginScreen.dart';
 import 'package:proyecto_libreria/screens/menu.dart';
 import 'package:proyecto_libreria/screens/perfil_usuario.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -24,6 +25,14 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: menu());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Biblioteca Virtual',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromRGBO(25, 173, 166, 1)),
+        useMaterial3: true,
+      ),
+      home: const menu(),
+    );
   }
 }
