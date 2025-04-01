@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_libreria/screens/Biblioteca_screen.dart';
 import 'package:proyecto_libreria/screens/Busqueda_screen.dart';
 import 'package:proyecto_libreria/screens/Home_screen.dart';
+import 'package:proyecto_libreria/screens/favorites_screen.dart';
 import 'package:proyecto_libreria/screens/perfil_usuario.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -18,14 +20,17 @@ class CustomBottomNavBar extends StatelessWidget {
         nextScreen = const Home_screen();
         break;
       case 1:
-        // biblioteca
+        nextScreen = const BibliotecaScreen();
         return;
       case 2:
         nextScreen = const Busqueda_screen();
         break;
       case 3:
-        // perfil
-        return;
+        nextScreen = const FavoritosScreen(userId: 'user1');
+        break;
+      case 4:
+        nextScreen = const ProfileScreen(userId: 'user1');
+        break;
       default:
         return;
     }
@@ -52,6 +57,7 @@ class CustomBottomNavBar extends StatelessWidget {
           label: 'Biblioteca',
         ),
         BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Buscar'),
+        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favoritos'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
       ],
     );

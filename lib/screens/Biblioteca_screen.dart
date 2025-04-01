@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_libreria/screens/custom_navbar.dart';
 
-class Biblioteca_screen extends StatelessWidget {
-  const Biblioteca_screen({Key? key}) : super(key: key);
+class BibliotecaScreen extends StatefulWidget {
+  const BibliotecaScreen({Key? key}) : super(key: key);
 
   @override
-  
-  Widget build(BuildContext context){
+  _BibliotecaScreenState createState() => _BibliotecaScreenState();
+}
+
+class _BibliotecaScreenState extends State<BibliotecaScreen> {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      body: BibliotecaPage(),
+      body: bibliotecapage(),
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 1),
     );
   }
-}
 
-class BibliotecaPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
+  Widget bibliotecapage() {
     return DefaultTabController(
       initialIndex: 0,
       length: 3,
@@ -27,34 +28,35 @@ class BibliotecaPage extends StatelessWidget {
             "Biblioteca",
             style: TextStyle(
               color: Color.fromARGB(255, 7, 222, 201),
-              fontWeight: FontWeight.bold
-            )),
-            centerTitle: true,
-            bottom: const TabBar(
-              labelColor: Color.fromARGB(255, 7, 222, 201),
-              unselectedLabelColor: Color.fromARGB(255, 183, 196, 195),
-              indicatorColor: Color.fromARGB(255, 7, 222, 201),
-              tabs: <Widget>[
-                Tab(icon: Icon(Icons.menu_book), text: "Lecturas"),
-                Tab(icon: Icon(Icons.collections_bookmark), text: "Colecciones"),
-                Tab(icon: Icon(Icons.bookmark_add), text: "Próximos"),
-              ],
-            )
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          centerTitle: true,
+          bottom: const TabBar(
+            labelColor: Color.fromARGB(255, 7, 222, 201),
+            unselectedLabelColor: Color.fromARGB(255, 183, 196, 195),
+            indicatorColor: Color.fromARGB(255, 7, 222, 201),
+            tabs: <Widget>[
+              Tab(icon: Icon(Icons.menu_book), text: "Lecturas"),
+              Tab(icon: Icon(Icons.collections_bookmark), text: "Colecciones"),
+              Tab(icon: Icon(Icons.bookmark_add), text: "Próximos"),
+            ],
+          ),
         ),
         body: TabBarView(
-          children:[
+          children: [
             librosGridView(), // Pestaña "Lecturas" muestra el grid de libros
             ColeccionesPage(), //Pestaña "Colecciones" para que se clasifiquen por genero
             ProximosPage(), //Pestaña "Próximos" para descubrir nuevos libros
-          ]
+          ],
         ),
-      )
+      ),
     );
   }
 }
 
 //Estructura de Lecturas (sobre como se mostrarían los libros)
-Widget librosGridView(){
+Widget librosGridView() {
   return Container(
     padding: EdgeInsets.all(10),
     margin: EdgeInsets.symmetric(),
@@ -63,9 +65,9 @@ Widget librosGridView(){
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2, //Número de columnas
         crossAxisSpacing: 15, // Espaciado Horizontal
-        mainAxisSpacing: 10 // Espaciado vertical
+        mainAxisSpacing: 10, // Espaciado vertical
       ),
-      itemBuilder: (BuildContext context, int index){
+      itemBuilder: (BuildContext context, int index) {
         return libroCard(libros[index]);
       },
     ),
@@ -73,7 +75,7 @@ Widget librosGridView(){
 }
 
 //Estructura de Colecciones
-class ColeccionesPage extends StatelessWidget{
+class ColeccionesPage extends StatelessWidget {
   //Lista de categoría
   final List<String> categorias = [
     "Fantasía",
@@ -81,24 +83,54 @@ class ColeccionesPage extends StatelessWidget{
     "Romance",
     "Aventura",
     "Biografía",
-    "Paranormal"
+    "Paranormal",
   ];
 
   //Libros agrupados por categoría
   final Map<String, List<Libro>> librosPorCategoria = {
-    "Fantasía":[
-      Libro(titulo: "Libro 1", genero: "Fantasía", imagen: "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg"),
-      Libro(titulo: "Libro 2", genero: "Fantasía", imagen: "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg"),
+    "Fantasía": [
+      Libro(
+        titulo: "Libro 1",
+        genero: "Fantasía",
+        imagen:
+            "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
+      ),
+      Libro(
+        titulo: "Libro 2",
+        genero: "Fantasía",
+        imagen:
+            "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
+      ),
     ],
-    "Ciencia Ficción":[
-      Libro(titulo: "Libro 3", genero: "Ciencia Ficción", imagen: "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg"),
+    "Ciencia Ficción": [
+      Libro(
+        titulo: "Libro 3",
+        genero: "Ciencia Ficción",
+        imagen:
+            "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
+      ),
     ],
-    "Romance":[
-      Libro(titulo: "Libro 4", genero: "Romance", imagen: "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg"),
-      Libro(titulo: "Libro 5", genero: "Romance", imagen: "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg"),
+    "Romance": [
+      Libro(
+        titulo: "Libro 4",
+        genero: "Romance",
+        imagen:
+            "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
+      ),
+      Libro(
+        titulo: "Libro 5",
+        genero: "Romance",
+        imagen:
+            "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
+      ),
     ],
-    "Aventura":[
-      Libro(titulo: "Libro 6", genero: "Aventura", imagen: "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg"),
+    "Aventura": [
+      Libro(
+        titulo: "Libro 6",
+        genero: "Aventura",
+        imagen:
+            "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
+      ),
     ],
   };
 
@@ -108,7 +140,10 @@ class ColeccionesPage extends StatelessWidget{
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text("Mi Biblioteca por Temas", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Mi Biblioteca por Temas",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: GridView.builder(
         padding: EdgeInsets.all(10),
@@ -116,13 +151,17 @@ class ColeccionesPage extends StatelessWidget{
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, //Número de columnas
           crossAxisSpacing: 15, // Espaciado Horizontal
-          mainAxisSpacing: 10 // Espaciado vertical
+          mainAxisSpacing: 10, // Espaciado vertical
         ),
-        itemBuilder: (BuildContext context, int index){
+        itemBuilder: (BuildContext context, int index) {
           return GestureDetector(
-            onTap: (){
+            onTap: () {
               //Muestra los libros de la categoría seleccionada
-              showBottomSheetLibros(context, categorias[index], librosPorCategoria[categorias[index]] ?? []);
+              showBottomSheetLibros(
+                context,
+                categorias[index],
+                librosPorCategoria[categorias[index]] ?? [],
+              );
             },
             child: Container(
               decoration: BoxDecoration(
@@ -132,28 +171,62 @@ class ColeccionesPage extends StatelessWidget{
               child: Center(
                 child: Text(
                   categorias[index],
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
                   textAlign: TextAlign.center,
-                  )
+                ),
               ),
             ),
           );
-        }, 
+        },
       ),
     );
   }
 }
 
 //Estructura de Proximos
-class ProximosPage extends StatelessWidget{
+class ProximosPage extends StatelessWidget {
   //Nuevos libros recomendados
   final List<Libro> librosNuevos = [
-  Libro(titulo: "Libro 7", genero: "Gen 1", imagen: "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg"),
-  Libro(titulo: "Libro 8", genero: "Gen 2", imagen: "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg"),
-  Libro(titulo: "Libro 9", genero: "Gen 3", imagen: "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg"),
-  Libro(titulo: "Libro 10", genero: "Gen 4", imagen: "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg"),
-  Libro(titulo: "Libro 11", genero: "Gen 5", imagen: "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg"),
-  Libro(titulo: "Libro 12", genero: "Gen 6", imagen: "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg"),
+    Libro(
+      titulo: "Libro 7",
+      genero: "Gen 1",
+      imagen:
+          "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
+    ),
+    Libro(
+      titulo: "Libro 8",
+      genero: "Gen 2",
+      imagen:
+          "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
+    ),
+    Libro(
+      titulo: "Libro 9",
+      genero: "Gen 3",
+      imagen:
+          "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
+    ),
+    Libro(
+      titulo: "Libro 10",
+      genero: "Gen 4",
+      imagen:
+          "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
+    ),
+    Libro(
+      titulo: "Libro 11",
+      genero: "Gen 5",
+      imagen:
+          "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
+    ),
+    Libro(
+      titulo: "Libro 12",
+      genero: "Gen 6",
+      imagen:
+          "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
+    ),
   ];
 
   @override
@@ -175,28 +248,33 @@ class ProximosPage extends StatelessWidget{
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
         ),
-        itemBuilder: (BuildContext context, int index){
+        itemBuilder: (BuildContext context, int index) {
           return libroCard(librosNuevos[index]);
-        }
+        },
       ),
     );
   }
 }
 
-void showBottomSheetLibros(BuildContext context, String categoria, List<Libro> libros){
+void showBottomSheetLibros(
+  BuildContext context,
+  String categoria,
+  List<Libro> libros,
+) {
   showModalBottomSheet(
-    context: context, 
-    builder: (BuildContext context){
+    context: context,
+    builder: (BuildContext context) {
       return Container(
         padding: EdgeInsets.all(15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Libros en $categoria",
+            Text(
+              "Libros en $categoria",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 0, 76, 72)
+                color: Color.fromARGB(255, 0, 76, 72),
               ),
             ),
             const SizedBox(height: 10),
@@ -206,20 +284,19 @@ void showBottomSheetLibros(BuildContext context, String categoria, List<Libro> l
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2, //Número de columnas
                   crossAxisSpacing: 15, // Espaciado Horizontal
-                  mainAxisSpacing: 15 // Espaciado vertical
+                  mainAxisSpacing: 15, // Espaciado vertical
                 ),
-                itemBuilder: (BuildContext context, int index){
+                itemBuilder: (BuildContext context, int index) {
                   return libroCard(libros[index]);
-                }
-              )
-            )
+                },
+              ),
+            ),
           ],
         ),
       );
-    }
+    },
   );
 }
-
 
 // Clase para definir un libro
 class Libro {
@@ -230,12 +307,42 @@ class Libro {
 }
 
 List<Libro> libros = [
-  Libro(titulo: "Libro 1", genero: "Gen 1", imagen: "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg"),
-  Libro(titulo: "Libro 2", genero: "Gen 2", imagen: "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg"),
-  Libro(titulo: "Libro 3", genero: "Gen 3", imagen: "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg"),
-  Libro(titulo: "Libro 4", genero: "Gen 4", imagen: "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg"),
-  Libro(titulo: "Libro 5", genero: "Gen 5", imagen: "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg"),
-  Libro(titulo: "Libro 6", genero: "Gen 6", imagen: "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg"),
+  Libro(
+    titulo: "Libro 1",
+    genero: "Gen 1",
+    imagen:
+        "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
+  ),
+  Libro(
+    titulo: "Libro 2",
+    genero: "Gen 2",
+    imagen:
+        "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
+  ),
+  Libro(
+    titulo: "Libro 3",
+    genero: "Gen 3",
+    imagen:
+        "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
+  ),
+  Libro(
+    titulo: "Libro 4",
+    genero: "Gen 4",
+    imagen:
+        "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
+  ),
+  Libro(
+    titulo: "Libro 5",
+    genero: "Gen 5",
+    imagen:
+        "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
+  ),
+  Libro(
+    titulo: "Libro 6",
+    genero: "Gen 6",
+    imagen:
+        "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
+  ),
 ];
 
 // Cards
@@ -244,7 +351,7 @@ Widget libroCard(Libro book) {
     borderRadius: BorderRadius.circular(10),
     child: Stack(
       children: [
-      //Abarca todo el espacio del cuadro
+        //Abarca todo el espacio del cuadro
         Image.network(
           book.imagen, //Usa la URL de la imagen
           width: double.infinity, //ancho completo
@@ -259,25 +366,25 @@ Widget libroCard(Libro book) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                    Text(book.titulo, style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      book.genero, style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                    textAlign: TextAlign.center,
-                    )
-                  ],
-            )
-          )
-        )
+                Text(
+                  book.titulo,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  book.genero,
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     ),
   );
