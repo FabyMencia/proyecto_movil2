@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:proyecto_libreria/screens/custom_navbar.dart';
+import 'package:proyecto_libreria/screens/Busqueda_screen.dart';
 
 class Home_screen extends StatelessWidget {
   const Home_screen({Key? key}) : super(key: key);
@@ -13,56 +15,98 @@ class Home_screen extends StatelessWidget {
         centerTitle: true,
       ),
       backgroundColor: const Color(0xFFcad9dc),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(15.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Campo de búsqueda
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF5E8585),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: const TextField(
-                style: TextStyle(color: Colors.white, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: 'Buscar libros...',
-                  hintStyle: TextStyle(color: Colors.white),
-                  border: InputBorder.none,
-                  prefixIcon: Icon(Icons.search, color: Colors.white),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 12,
-                  ), // Alinea el texto con el icono
+            // Carrusel de imágenes con estilo mejorado
+            Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                CarouselSlider(
+                  options: CarouselOptions(
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                    viewportFraction: 0.85, // Tamaño de las imágenes
+                    aspectRatio: 16 / 9,
+                    autoPlayCurve: Curves.fastOutSlowIn, // Animación más fluida
+                    enableInfiniteScroll: true,
+                  ),
+                  items:
+                      [
+                        'lib/assets/carousel1.jpg',
+                        'lib/assets/carousel2.jpg',
+                        'lib/assets/carousel3.jpg',
+                        'lib/assets/carousel4.jpg',
+                      ].map((item) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 8,
+                                spreadRadius: 2,
+                                offset: const Offset(2, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.asset(item, fit: BoxFit.cover),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.black.withOpacity(0.1),
+                                        Colors.black.withOpacity(0.5),
+                                      ],
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Sección de Libros Destacados
-            const Text(
-              "Libros Destacados",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            SizedBox(
-              height: 150,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  bookCard(
-                    "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
+                // Indicador de posición
+                Positioned(
+                  bottom: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(
+                        4, // Cantidad de imágenes
+                        (index) => Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: index == 0 ? Colors.white : Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  bookCard(
-                    "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
-                  ),
-                  bookCard(
-                    "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
 
@@ -73,39 +117,26 @@ class Home_screen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
 
-            // Botones de géneros en dos filas
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 3,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                children: [
-                  genreButton(
-                    "Ficción",
-                    "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
-                  ),
-                  genreButton(
-                    "Ciencia",
-                    "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380294_640.jpg",
-                  ),
-                  genreButton(
-                    "Historia",
-                    "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
-                  ),
-                  genreButton(
-                    "Filosofía",
-                    "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
-                  ),
-                  genreButton(
-                    "Arte",
-                    "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
-                  ),
-                  genreButton(
-                    "Misterio",
-                    "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
-                  ),
-                ],
-              ),
+            // Botones de géneros en GridView
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 3,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              children: [
+                genreButton("Ficción", "lib/assets/ficción.jpg", 1, context),
+                genreButton("Ciencia", "lib/assets/ciencia.jpg", 2, context),
+                genreButton("Historia", "lib/assets/historia.jpg", 3, context),
+                genreButton(
+                  "Filosofía",
+                  "lib/assets/filosofia.jpg",
+                  4,
+                  context,
+                ),
+                genreButton("Arte", "lib/assets/arte.jpg", 5, context),
+                genreButton("Misterio", "lib/assets/misterio.jpg", 6, context),
+              ],
             ),
           ],
         ),
@@ -114,38 +145,34 @@ class Home_screen extends StatelessWidget {
     );
   }
 
-  // Widget para cada libro en la lista horizontal
-  Widget bookCard(String imageUrl) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Image.network(
-          imageUrl,
-          width: 120,
-          height: 150,
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
-
-  // Widget para los botones de géneros populares
-  Widget genreButton(String title, String imageUrl) {
+  Widget genreButton(
+    String title,
+    String assetPath,
+    int categoryId,
+    BuildContext context,
+  ) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         padding: EdgeInsets.zero,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         backgroundColor: const Color(0xFF083332),
       ),
-      onPressed: () {},
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => Busqueda_screen(selectedCategoryId: categoryId),
+          ),
+        );
+      },
       child: Stack(
         alignment: Alignment.center,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              imageUrl,
+            child: Image.asset(
+              assetPath,
               width: double.infinity,
               height: double.infinity,
               fit: BoxFit.cover,
