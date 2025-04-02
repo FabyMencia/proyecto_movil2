@@ -213,7 +213,7 @@ class _Busqueda_screenState extends State<Busqueda_screen> {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-            color: Colors.black54, // Fondo oscuro similar a Home_screen
+            color: Colors.black54,
             padding: const EdgeInsets.all(5),
             child: Text(
               categoryName,
