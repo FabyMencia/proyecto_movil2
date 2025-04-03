@@ -1,6 +1,8 @@
+//import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:proyecto_libreria/screens/signup.dart';
-import 'package:proyecto_libreria/screens/menu.dart';
+import 'package:proyecto_libreria/screens/Home_screen.dart';
+import 'package:proyecto_libreria/database/Usuario_db.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,14 +11,39 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+bool resultado = false;
+
 class _LoginScreenState extends State<LoginScreen> {
+  final UsuarioDB _UserQuery = UsuarioDB();
+  var _datosUsuario;
+  bool _isLoading = true;
+  String _errorMessage = '';
+
   //Text Editing Controller
   final username = TextEditingController();
   final password = TextEditingController();
+
   bool Visibilidad = false;
   bool Inicio = false;
 
   final formKey = GlobalKey<FormState>();
+
+  limpiarTxt() {
+    username.text = '';
+    password.text = '';
+  }
+
+  Future<void> _userLogin(String usuario, String contra) async {
+    var User_L = (await _UserQuery.validateUser(usuario, contra))?.toMap();
+
+    if ((User_L?['userid'] == usuario) && (User_L?['password'] == contra)) {
+      resultado = true;
+      limpiarTxt();
+    } else {
+      resultado = false;
+      limpiarTxt();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,20 +146,31 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: const Color.fromRGBO(11, 131, 125, 1),
                       ),
                       child: TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            //Login method will be here
-                            //login();
+                            await _userLogin(
+                              username.text,
+                              password.text,
+                            ); 
 
-                            //Now we have a response from our sqlite method
-                            //We are going to create a user
+                            setState(
+                              () {},
+                            ); // Forzar actualización del nuevo valor de resultado
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const menu(),
-                              ),
-                            );
+                            if (resultado == true) {
+                              resultado =
+                                  false; // Restablecer la variable después de usarla
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const Home_screen(),
+                                ),
+                              );
+                            } else {
+                              setState(() {
+                                Inicio = true; // Muestra mensaje de error
+                              });
+                            }
                           }
                         },
                         child: const Text(
