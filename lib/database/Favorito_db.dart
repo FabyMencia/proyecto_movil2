@@ -60,6 +60,7 @@ class FavoritoDB {
           f.${DatabaseHelper.colEsFavorito},
           l.${DatabaseHelper.colTitulo}, 
           l.${DatabaseHelper.colImagenLibro},
+          l.${DatabaseHelper.colPdfLibro},
           l.${DatabaseHelper.colAnoPublicacion},
           a.${DatabaseHelper.colNombreAutor},
           c.${DatabaseHelper.colNombreCategoria}

@@ -139,7 +139,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
                       year:
                           "${libro['ano_publicacion']} • ${_getPaisdeAutor(libro['nombre_autor'])}",
                       genres: [libro['nombre_categoria']],
-                        url: libro['pdf_libro']??'',
+                        url: libro['pdf_libro']??'lib/assets/el_principito.pdf',
                       imageUrl:
                           libro['imagen_libro'] ??
                           'https://via.placeholder.com/150',
