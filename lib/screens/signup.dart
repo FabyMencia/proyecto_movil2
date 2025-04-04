@@ -37,7 +37,7 @@ class _SignUpState extends State<SignUp> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset("../lib/assets/logo.jpg", width: 100),
+                  Image.asset("lib/assets/logo.jpg", width: 100),
                   const SizedBox(height: 15),
                   const ListTile(
                     title: Text(
