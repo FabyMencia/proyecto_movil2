@@ -257,16 +257,16 @@ class DatabaseHelper {
       ''');
 
       // Insertar datos de ejemplo para libros
-      await db.execute('''
+       await db.execute('''
         INSERT INTO $libroTable 
-        ($colIsbn, $colTitulo, $colIdAutor, $colIdCategoria, $colSinopsis, $colAnoPublicacion, $colImagenLibro) 
+        ($colIsbn, $colTitulo, $colIdAutor, $colIdCategoria, $colSinopsis, $colAnoPublicacion,$colPdfLibro, $colImagenLibro) 
         VALUES 
-        ('9780307474278', 'Cien años de soledad', 1, 6, 'La historia de la familia Buendía a lo largo de siete generaciones en el pueblo ficticio de Macondo.', 1967, 'https://via.placeholder.com/150'),
-        ('9788478884957', 'Harry Potter y la piedra filosofal', 2, 9, 'El primer año de Harry Potter en la escuela de magia y hechicería Hogwarts.', 1997, 'https://via.placeholder.com/150'),
-        ('9788497594257', 'El resplandor', 3, 5, 'Un escritor y su familia cuidan de un hotel aislado durante el invierno, donde una presencia siniestra influye en el padre hacia la violencia.', 1977, 'https://via.placeholder.com/150'),
-        ('9788499890944', '1984', 4, 3, 'Una sociedad totalitaria donde el gobierno controla cada aspecto de la vida de las personas.', 1949, 'https://via.placeholder.com/150'),
-        ('9788498381498', 'El principito', 5, 10, 'Un pequeño príncipe que viaja por el universo descubriendo la extraña manera en que los adultos ven la vida.', 1943, 'https://via.placeholder.com/150'),
-        ('9788445073735', 'El señor de los anillos', 6, 8, 'Un hobbit debe destruir un anillo mágico para evitar que caiga en manos del Señor Oscuro.', 1954, 'https://via.placeholder.com/150')
+        ('9780307474278', 'Cien años de soledad', 1, 6, 'La historia de la familia Buendía a lo largo de siete generaciones en el pueblo ficticio de Macondo.', 1967,'lib/assets/cienanos.pdf','https://images.cdn1.buscalibre.com/fit-in/360x360/f2/e8/f2e8856c5f628b4b4e63065abc332c30.jpg'),
+        ('9788478884957', 'Harry Potter y las reliquias de la muerte', 2, 9, 'El primer año de Harry Potter en la escuela de magia y hechicería Hogwarts.', 1997,'lib/assets/Harry-Potter-y-las-reliquias-de-la-muerte-J.K-Rowling_.pdf','https://images.justwatch.com/poster/138014805/s718/harry-potter-y-la-piedra-filosofal.jpg'),
+        ('9788497594257', 'El resplandor', 3, 5, 'Un escritor y su familia cuidan de un hotel aislado durante el invierno, donde una presencia siniestra influye en el padre hacia la violencia.', 1977, 'lib/assets/resplandor.pdf', 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhKgpltqwEawOKhyphenhyphenRPv-rfBUQtdFRIiOGegUj8RAi7KbvtAaGq_VBQukwVx8jpPt-xqILCFFvoX1xY5OVH9vvBuXTF1Ljt3AxA3TKnNe0_yadWpzY5hMLVx5e6KkrzUuBIZCq-1HQiStA/s1600/EL+RESPLANDOR+3.jpg'),
+        ('9788499890944', '1984', 4, 3, 'Una sociedad totalitaria donde el gobierno controla cada aspecto de la vida de las personas.', 1949,'lib/assets/1984.pdf', 'https://archive.org/services/img/1984_thegraphicnovel/full/pct:200/0/default.jpg'),
+        ('9788498381498', 'El principito', 5, 10, 'Un pequeño príncipe que viaja por el universo descubriendo la extraña manera en que los adultos ven la vida.', 1943,'lib/assets/elprincipito.pdf', 'https://img3.od-cdn.com/ImageType-100/5835-1/%7B506DE528-F8C7-41ED-A27C-3864BEBF7BF2%7DImg100.jpg'),
+        ('9788445073735', 'El señor de los anillos', 6, 8, 'Un hobbit debe destruir un anillo mágico para evitar que caiga en manos del Señor Oscuro.', 1954,'lib/assets/comunidaddelanillo.pdf', 'https://www.planetadelibros.com/usuaris/libros/fotos/325/original/portada_el-senor-de-los-anillos-n-0303-el-retorno-del-rey-ne_j-r-r-tolkien_202203111320.jpg')
       ''');
 
       // Insertar datos de ejemplo para favoritos

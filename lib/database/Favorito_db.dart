@@ -122,4 +122,42 @@ class FavoritoDB {
       return -1;
     }
   }
+   Future<Map<String, dynamic>?> getFavoriteAuthorAndBook(String userid) async {
+    Database db = await _databaseHelper.database;
+    // Query for the favorite book (most favorited)
+    final favoriteBookResult = await db.rawQuery(
+      '''
+    SELECT l.${DatabaseHelper.colTitulo}, COUNT(*) AS count
+    FROM ${DatabaseHelper.favoritosTable} f
+    INNER JOIN ${DatabaseHelper.libroTable} l ON f.${DatabaseHelper.colIdLibro} = l.${DatabaseHelper.colIdLibro}
+    WHERE f.${DatabaseHelper.colIdUsuario} = ? AND f.${DatabaseHelper.colEsFavorito} = 1
+    GROUP BY l.${DatabaseHelper.colTitulo}
+    ORDER BY count DESC
+    LIMIT 1
+  ''',
+      [userid],
+    );
+
+    // Query for the favorite author (whose books are favorited the most)
+    final favoriteAuthorResult = await db.rawQuery('''
+    SELECT a.${DatabaseHelper.colNombreAutor}, COUNT(*) AS count
+    FROM ${DatabaseHelper.favoritosTable} f
+    INNER JOIN ${DatabaseHelper.libroTable} l ON f.${DatabaseHelper.colIdLibro} = l.${DatabaseHelper.colIdLibro}
+    INNER JOIN ${DatabaseHelper.autorTable} a ON l.${DatabaseHelper.colIdAutor} = a.${DatabaseHelper.colIdAutor}
+    WHERE f.${DatabaseHelper.colIdUsuario} = ? AND f.${DatabaseHelper.colEsFavorito} = 1
+    GROUP BY a.${DatabaseHelper.colNombreAutor}
+    ORDER BY count DESC
+    LIMIT 1
+  ''', [userid]);
+
+    if (favoriteBookResult.isNotEmpty && favoriteAuthorResult.isNotEmpty) {
+      return {
+        'favorite_book': favoriteBookResult.first[DatabaseHelper.colTitulo],
+        'favorite_author':
+            favoriteAuthorResult.first[DatabaseHelper.colNombreAutor],
+      };
+    } else {
+      return null; // No favorites found
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_libreria/database/Favorito_db.dart';
 import 'package:proyecto_libreria/screens/custom_navbar.dart';
+import 'package:proyecto_libreria/screens/Pdfview_screen.dart';
 
 class FavoritosScreen extends StatefulWidget {
   final String userId;
@@ -60,6 +61,15 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
     }
   }
 
+  void openpdf(BuildContext context, String url) => Navigator.of(context).push(
+    MaterialPageRoute(
+      builder:
+          (context) => PDFViewerPage(
+            assetPath:
+               url,
+          ),
+    ),
+  );
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,6 +139,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
                       year:
                           "${libro['ano_publicacion']} • ${_getPaisdeAutor(libro['nombre_autor'])}",
                       genres: [libro['nombre_categoria']],
+                        url: libro['pdf_libro']??'',
                       imageUrl:
                           libro['imagen_libro'] ??
                           'https://via.placeholder.com/150',
@@ -159,6 +170,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
     required List<String> genres,
     required String imageUrl,
     required bool isFavorite,
+   required String url,
   }) {
     return Card(
       elevation: 3,
@@ -258,6 +270,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Abriendo libro: $title')),
                           );
+                          openpdf(context,url);
                         },
                         child: const Text(
                           "Leer",

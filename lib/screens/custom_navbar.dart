@@ -21,7 +21,7 @@ class CustomBottomNavBar extends StatelessWidget {
         break;
       case 1:
         nextScreen = const BibliotecaScreen();
-        return;
+        break;
       case 2:
         nextScreen = const Busqueda_screen();
         break;

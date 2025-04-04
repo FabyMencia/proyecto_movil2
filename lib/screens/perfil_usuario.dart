@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto_libreria/database/Favorito_db.dart';
 import 'package:proyecto_libreria/model/Users.dart';
 import 'package:proyecto_libreria/database/Usuario_db.dart';
 import 'package:proyecto_libreria/screens/custom_navbar.dart';
@@ -14,14 +15,21 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   UsuarioDB usuarioQuery = UsuarioDB();
+  final Favoritodb = FavoritoDB();
   Users? user;
   bool isLoading = true;
+  bool _isLoading = true;
+  String _errorMessage = '';
   String errorMessage = '';
-
+  String favoriteAuthor = 'Cargando...';
+  String favoriteBook = 'Cargando...';
+   List<Map<String, dynamic>> _favoritos = [];
   @override
   void initState() {
     super.initState();
     _fetchUser();
+    _loadFavoriteauthorybook();
+    _loadFavoritos();
   }
 
   Future<void> _fetchUser() async {
@@ -40,6 +48,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         isLoading = false;
         errorMessage = 'Error al cargar datos: $e';
+      });
+    }
+  }
+
+  Future<void> _loadFavoriteauthorybook() async {
+    final result = await Favoritodb.getFavoriteAuthorAndBook(widget.userId);
+
+    setState(() {
+      favoriteAuthor = result?['favorite_author'] ?? "No hay datos";
+      favoriteBook = result?['favorite_book'] ?? "No hay datos";
+    });
+  }
+
+  Future<void> _loadFavoritos() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = '';
+      });
+
+      final favoritos = await Favoritodb.getUserFavorites(widget.userId);
+
+      setState(() {
+        _favoritos = favoritos;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Error al cargar favoritos: $e';
       });
     }
   }
@@ -147,14 +185,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Favorite Author
                 _buildSectionCard(
                   title: "Autor Favorito",
-                  content: "Margaret Atwood",
+                  content: favoriteAuthor,
                   icon: Icons.person,
                 ),
                 const SizedBox(height: 16),
                 // Most Read Book
                 _buildSectionCard(
                   title: "Libro Más Leido",
-                  content: "The Handmaid's Tale",
+                  content: favoriteBook,
                   icon: Icons.book,
                 ),
                 const SizedBox(height: 16),
@@ -324,26 +362,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildBookList() {
-    List<Map<String, String>> books = [
-      {
-        'title': "The Handmaid's Tale",
-        'author': "Margaret Atwood",
-        'image': 'assets/handmaids_tale.jpg',
-      },
-      {'title': "1984", 'author': "George Orwell", 'image': 'assets/1984.jpg'},
-      {
-        'title': "Brave New World",
-        'author': "Aldous Huxley",
-        'image': 'assets/brave_new_world.jpg',
-      },
-    ];
 
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      itemCount: books.length,
+      itemCount: _favoritos.length,
       clipBehavior: Clip.antiAlias,
       itemBuilder: (context, index) {
-        final book = books[index];
+        final books = _favoritos[index];
         return Container(
           margin: const EdgeInsets.only(right: 16),
           width: 125,
@@ -365,8 +390,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(
-                    book['image']!,
+                  child: Image.network(
+                    books['imagen_libro']!,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
@@ -386,7 +411,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 6),
               // Título del libro
               Text(
-                book['title']!,
+                books['titulo']!,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF083332),
@@ -398,7 +423,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 1),
               // Autor del libro
               Text(
-                book['author']!,
+                books['nombre_autor']!,
                 style: const TextStyle(fontSize: 11, color: Color(0xFF6E949C)),
                 overflow: TextOverflow.ellipsis,
               ),
