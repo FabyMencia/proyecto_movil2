@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_libreria/screens/custom_navbar.dart';
+import 'package:proyecto_libreria/database/Biblioteca_db.dart';
+import 'package:proyecto_libreria/database/Databasehelper.dart';
 
 class BibliotecaScreen extends StatefulWidget {
-  const BibliotecaScreen({Key? key}) : super(key: key);
+  final String userId;
+
+  const BibliotecaScreen({Key? key, required this.userId});
 
   @override
   _BibliotecaScreenState createState() => _BibliotecaScreenState();
@@ -12,18 +16,18 @@ class _BibliotecaScreenState extends State<BibliotecaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: bibliotecapage(),
+      body: _buildBibliotecaPage(),
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 1),
     );
   }
 
-  Widget bibliotecapage() {
+  Widget _buildBibliotecaPage() {
     return DefaultTabController(
       initialIndex: 0,
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 0, 76, 72),
+          backgroundColor: const Color.fromARGB(255, 0, 76, 72),
           title: const Text(
             "Biblioteca",
             style: TextStyle(
@@ -45,9 +49,9 @@ class _BibliotecaScreenState extends State<BibliotecaScreen> {
         ),
         body: TabBarView(
           children: [
-            librosGridView(), // Pestaña "Lecturas" muestra el grid de libros
-            ColeccionesPage(), //Pestaña "Colecciones" para que se clasifiquen por genero
-            ProximosPage(), //Pestaña "Próximos" para descubrir nuevos libros
+            LecturasPage(userId: widget.userId),
+            ColeccionesPage(userId: widget.userId),
+            ProximosPage(userId: widget.userId),
           ],
         ),
       ),
@@ -55,241 +59,221 @@ class _BibliotecaScreenState extends State<BibliotecaScreen> {
   }
 }
 
-//Estructura de Lecturas (sobre como se mostrarían los libros)
-Widget librosGridView() {
-  return Container(
-    padding: EdgeInsets.all(10),
-    margin: EdgeInsets.symmetric(),
-    child: GridView.builder(
-      itemCount: libros.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, //Número de columnas
-        crossAxisSpacing: 15, // Espaciado Horizontal
-        mainAxisSpacing: 10, // Espaciado vertical
+class LecturasPage extends StatelessWidget {
+  final String userId;
+
+  const LecturasPage({Key? key, required this.userId}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text(
+          "Mis Lecturas",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
-      itemBuilder: (BuildContext context, int index) {
-        return libroCard(libros[index]);
-      },
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: BibliotecaDb().getUserLecturas(userId),
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error al cargar lecturas: ${snapshot.error}"));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("No tienes libros en Lecturas."));
+          } else {
+            List<Map<String, dynamic>> libros = snapshot.data!;
+            return GridView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: libros.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3, 
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 0.6, // Ajusta la relación de aspecto para que las tarjetas tengan el mismo tamaño
+              ),
+              itemBuilder: (BuildContext context, int index) {
+                final libro = libros[index];
+                return libroCard(libro);
+              },
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+
+Widget libroCard(Map<String, dynamic> libro) {
+  return Container(
+    margin: const EdgeInsets.only(right: 16),
+    width: 125, 
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          height: 165, 
+          width: 125, 
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.network(
+              libro['imagen_libro']!,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: const Color(0xFF5E8585), 
+                  child: const Center(
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 40,
+                      color: Colors.white,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        // Título del libro
+        Text(
+          libro['titulo']!,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF083332),
+            fontSize: 13,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 1),
+      ],
     ),
   );
 }
 
-//Estructura de Colecciones
 class ColeccionesPage extends StatelessWidget {
-  //Lista de categoría
-  final List<String> categorias = [
-    "Fantasía",
-    "Ciencia Ficción",
-    "Romance",
-    "Aventura",
-    "Biografía",
-    "Paranormal",
-  ];
+  final String userId;
 
-  //Libros agrupados por categoría
-  final Map<String, List<Libro>> librosPorCategoria = {
-    "Fantasía": [
-      Libro(
-        titulo: "Libro 1",
-        genero: "Fantasía",
-        imagen:
-            "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
-      ),
-      Libro(
-        titulo: "Libro 2",
-        genero: "Fantasía",
-        imagen:
-            "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
-      ),
-    ],
-    "Ciencia Ficción": [
-      Libro(
-        titulo: "Libro 3",
-        genero: "Ciencia Ficción",
-        imagen:
-            "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
-      ),
-    ],
-    "Romance": [
-      Libro(
-        titulo: "Libro 4",
-        genero: "Romance",
-        imagen:
-            "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
-      ),
-      Libro(
-        titulo: "Libro 5",
-        genero: "Romance",
-        imagen:
-            "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
-      ),
-    ],
-    "Aventura": [
-      Libro(
-        titulo: "Libro 6",
-        genero: "Aventura",
-        imagen:
-            "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
-      ),
-    ],
-  };
+  const ColeccionesPage({Key? key, required this.userId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    const SizedBox(height: 20);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text(
-          "Mi Biblioteca por Temas",
+          "Mis Colecciones",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      body: GridView.builder(
-        padding: EdgeInsets.all(10),
-        itemCount: categorias.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, //Número de columnas
-          crossAxisSpacing: 15, // Espaciado Horizontal
-          mainAxisSpacing: 10, // Espaciado vertical
-        ),
-        itemBuilder: (BuildContext context, int index) {
-          return GestureDetector(
-            onTap: () {
-              //Muestra los libros de la categoría seleccionada
-              showBottomSheetLibros(
-                context,
-                categorias[index],
-                librosPorCategoria[categorias[index]] ?? [],
-              );
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(10),
+      body: FutureBuilder<Map<String, List<Map<String, dynamic>>>>(
+        future: BibliotecaDb().getUserColecciones(userId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error al cargar colecciones: ${snapshot.error}"));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("No tienes libros guardados en categorías."));
+          } else {
+            Map<String, List<Map<String, dynamic>>> colecciones = snapshot.data!;
+            return GridView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: colecciones.keys.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Número de columnas
+                crossAxisSpacing: 15, // Espaciado Horizontal
+                mainAxisSpacing: 10, // Espaciado vertical
               ),
-              child: Center(
-                child: Text(
-                  categorias[index],
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black87,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          );
+              itemBuilder: (BuildContext context, int index) {
+                String categoria = colecciones.keys.elementAt(index);
+                List<Map<String, dynamic>> libros = colecciones[categoria] ?? [];
+                return categoriaCard(context, categoria, libros);
+              },
+            );
+          }
         },
       ),
     );
   }
-}
 
-//Estructura de Proximos
-class ProximosPage extends StatelessWidget {
-  //Nuevos libros recomendados
-  final List<Libro> librosNuevos = [
-    Libro(
-      titulo: "Libro 7",
-      genero: "Gen 1",
-      imagen:
-          "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
-    ),
-    Libro(
-      titulo: "Libro 8",
-      genero: "Gen 2",
-      imagen:
-          "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
-    ),
-    Libro(
-      titulo: "Libro 9",
-      genero: "Gen 3",
-      imagen:
-          "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
-    ),
-    Libro(
-      titulo: "Libro 10",
-      genero: "Gen 4",
-      imagen:
-          "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
-    ),
-    Libro(
-      titulo: "Libro 11",
-      genero: "Gen 5",
-      imagen:
-          "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
-    ),
-    Libro(
-      titulo: "Libro 12",
-      genero: "Gen 6",
-      imagen:
-          "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text(
-          "Descubre nuevas Historias",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+  Widget categoriaCard(BuildContext context, String categoria, List<Map<String, dynamic>> libros) {
+    return GestureDetector(
+      onTap: () {
+        showBottomSheetLibros(context, categoria, libros);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 225, 152, 152),
+          borderRadius: BorderRadius.circular(10),
         ),
-        backgroundColor: const Color(0xFF0B837d),
-      ),
-      body: GridView.builder(
         padding: const EdgeInsets.all(10),
-        itemCount: librosNuevos.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              categoria,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 5),
+            Text(
+              "${libros.length} libros",
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-        itemBuilder: (BuildContext context, int index) {
-          return libroCard(librosNuevos[index]);
-        },
       ),
     );
   }
 }
 
-void showBottomSheetLibros(
-  BuildContext context,
-  String categoria,
-  List<Libro> libros,
-) {
+void showBottomSheetLibros(BuildContext context, String categoria, List<Map<String, dynamic>> libros) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Container(
-        padding: EdgeInsets.all(15),
+        padding: const EdgeInsets.all(15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               "Libros en $categoria",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 0, 76, 72),
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Expanded(
-              child: GridView.builder(
-                itemCount: libros.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, //Número de columnas
-                  crossAxisSpacing: 15, // Espaciado Horizontal
-                  mainAxisSpacing: 15, // Espaciado vertical
-                ),
-                itemBuilder: (BuildContext context, int index) {
-                  return libroCard(libros[index]);
-                },
-              ),
+              child: libros.isEmpty
+                  ? const Center(child: Text("No hay libros en esta categoría."))
+                  : ListView.builder(
+                      itemCount: libros.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final libro = libros[index];
+                        return libroCard(libro); 
+                      },
+                    ),
             ),
           ],
         ),
@@ -298,94 +282,152 @@ void showBottomSheetLibros(
   );
 }
 
-// Clase para definir un libro
-class Libro {
-  final String titulo;
-  final String genero;
-  final String imagen;
-  Libro({required this.titulo, required this.genero, required this.imagen});
+
+//Estructura de Proximos
+class ProximosPage extends StatefulWidget {
+  final String userId;
+
+  ProximosPage({required this.userId});
+
+  @override
+  _ProximosPageState createState() => _ProximosPageState();
 }
 
-List<Libro> libros = [
-  Libro(
-    titulo: "Libro 1",
-    genero: "Gen 1",
-    imagen:
-        "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
-  ),
-  Libro(
-    titulo: "Libro 2",
-    genero: "Gen 2",
-    imagen:
-        "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
-  ),
-  Libro(
-    titulo: "Libro 3",
-    genero: "Gen 3",
-    imagen:
-        "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
-  ),
-  Libro(
-    titulo: "Libro 4",
-    genero: "Gen 4",
-    imagen:
-        "https://cdn.pixabay.com/photo/2025/02/19/06/17/winter-9416919_640.jpg",
-  ),
-  Libro(
-    titulo: "Libro 5",
-    genero: "Gen 5",
-    imagen:
-        "https://cdn.pixabay.com/photo/2025/02/03/21/01/forest-9380292_640.jpg",
-  ),
-  Libro(
-    titulo: "Libro 6",
-    genero: "Gen 6",
-    imagen:
-        "https://cdn.pixabay.com/photo/2024/12/27/14/58/owl-9294302_640.jpg",
-  ),
-];
+class _ProximosPageState extends State<ProximosPage> {
+  late Future<List<Map<String, dynamic>>> librosFuturos;
 
-// Cards
-Widget libroCard(Libro book) {
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(10),
-    child: Stack(
-      children: [
-        //Abarca todo el espacio del cuadro
-        Image.network(
-          book.imagen, //Usa la URL de la imagen
-          width: double.infinity, //ancho completo
-          height: double.infinity,
-          fit: BoxFit.cover,
+  @override
+  void initState() {
+    super.initState();
+    librosFuturos = BibliotecaDb().getLibrosNoAgregados(widget.userId);
+  }
+
+  Future<void> agregarALecturas(Map<String, dynamic> libro) async {
+  try {
+    print("Agregando libro: ${libro['titulo']}");
+    await BibliotecaDb().agregarLibro(widget.userId, libro[DatabaseHelper.colIdLibro]);
+    setState(() {
+      // Actualiza la lista de libros futuros
+      librosFuturos = BibliotecaDb().getLibrosNoAgregados(widget.userId);
+    });
+  } catch (e) {
+    print("Error al agregar libro: $e");
+  }
+}
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text(
+          "Descubre nuevas Historias",
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            color: Colors.black54,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  book.titulo,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+      ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: librosFuturos,
+        builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error al cargar recomendaciones: ${snapshot.error}"));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("No hay recomendaciones disponibles."));
+          } else {
+            List<Map<String, dynamic>> libros = snapshot.data!;
+            return SingleChildScrollView( 
+              child: Column(
+                children: [
+                  GridView.builder(
+                    padding: const EdgeInsets.all(10),
+                    itemCount: libros.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3, 
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 20,
+                      childAspectRatio: 0.6, 
+                    ),
+                    shrinkWrap: true, 
+                    physics: const NeverScrollableScrollPhysics(), 
+                    itemBuilder: (BuildContext context, int index) {
+                      final libro = libros[index];
+                      return ProximosCard(libro, agregarALecturas);
+                    },
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  book.genero,
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                  textAlign: TextAlign.center,
+                  const SizedBox(height: 20), 
+                ],
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+
+Widget ProximosCard(Map<String, dynamic> libro, Function(Map<String, dynamic>) onAdd) {
+  return GestureDetector(
+    onTap: () {
+      // mostrar más detalles del libro
+    },
+    child: Container(
+      margin: const EdgeInsets.only(right: 16),
+      width: 125, 
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 165, 
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                libro['imagen_libro']!,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: const Color(0xFF5E8585), // Color de fondo en caso de error
+                    child: const Center(
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 40,
+                        color: Colors.white,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 6),
+          Text(
+            libro['titulo']!,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF083332),
+              fontSize: 13,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: () => onAdd(libro),
+            child: const Icon(Icons.add),
+          ),
+        ],
+      ),
     ),
   );
 }
