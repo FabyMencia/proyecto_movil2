@@ -15,6 +15,7 @@ class DatabaseHelper {
   static const String generoTable = 'genero';
   static const String descargasTable = 'descargas';
   static const String favoritosTable = 'favoritos';
+  static const String lecturasTable = 'lecturas';
 
   // Columnas para usuario
   static const String colIdUsuario = 'id_usuario';
@@ -51,6 +52,10 @@ class DatabaseHelper {
   // Columnas para favoritos
   static const String colIdFavorito = 'id_favorito';
   static const String colEsFavorito = 'es_favorito';
+
+  // Columnas para lecturas
+  static const String colIdLectura = 'id_lectura';
+  static const String colFechaAgregado = 'fecha_agregado';
 
   static late DatabaseHelper _databaseHelper = DatabaseHelper._createInstance();
   static Database? _database;
@@ -163,6 +168,18 @@ class DatabaseHelper {
           $colIdUsuario TEXT,
           $colIdLibro INTEGER,
           $colEsFavorito INTEGER DEFAULT 0,
+          FOREIGN KEY ($colIdUsuario) REFERENCES $usuarioTable ($colIdUsuario),
+          FOREIGN KEY ($colIdLibro) REFERENCES $libroTable ($colIdLibro)
+        )
+      ''');
+
+      // Crear tabla lecturas
+      await db.execute('''
+        CREATE TABLE $lecturasTable (
+          $colIdLectura INTEGER PRIMARY KEY AUTOINCREMENT,
+          $colIdUsuario TEXT,
+          $colIdLibro INTEGER,
+          $colFechaAgregado TEXT,
           FOREIGN KEY ($colIdUsuario) REFERENCES $usuarioTable ($colIdUsuario),
           FOREIGN KEY ($colIdLibro) REFERENCES $libroTable ($colIdLibro)
         )
@@ -281,6 +298,16 @@ class DatabaseHelper {
         ('user1', 2, 1),
         ('user1', 5, 1)
       ''');
+
+      //Insertar datos de ejemplo para Lecturas
+      await db.execute('''
+        INSERT INTO $lecturasTable ($colIdUsuario, $colIdLibro, $colFechaAgregado) VALUES 
+        ('user1', 1, '${DateTime.now()}'),
+        ('user1', 2, '${DateTime.now()}'),
+        ('user12', 3, '${DateTime.now()}'),
+        ('user123', 4, '${DateTime.now()}')
+      ''');
+      
     } catch (e) {
       rethrow;
     }
