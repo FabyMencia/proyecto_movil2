@@ -10,7 +10,11 @@ class SignUp extends StatefulWidget {
   State<SignUp> createState() => _SignUpState();
 }
 
+bool Verificar_usuario = false;
+bool resultado = false;
+
 class _SignUpState extends State<SignUp> {
+  final UsuarioDB _UserQuery = UsuarioDB();
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
@@ -24,6 +28,61 @@ class _SignUpState extends State<SignUp> {
   String? selectedGender;
 
   final UsuarioDB _userQuery = UsuarioDB(); // Instancia de la base de datos
+
+  Future<void> _verificarUsuario(String usuario) async {
+    var User_L = (await _UserQuery.getUserById(usuario))?.toMap();
+    if (User_L != null) {
+      resultado = false;
+    } else {
+      resultado = true;
+    }
+  }
+
+  //Validaciones
+  String Validaciones(String cadena, int operacion) {
+    //Validaciones generales
+    if (cadena.isEmpty) {
+      return 'No puede estar vacío';
+    } else if ((cadena.trim().isEmpty ||
+        RegExp(r'^\s|\s$').hasMatch(cadena) ||
+        cadena.contains(' ')) && operacion != 4) {
+      return 'No puede se permiten espacios en blanco';
+    }
+    //Validaciones Usuario
+    else if (!RegExp(r'^[a-zA-Z0-9!@#$%^&*(),.?":{}|<>_]+$').hasMatch(cadena) &&
+        operacion == 1) {
+      return 'Debe escribir solo números, letras o caracteres';
+    }
+    //Validaciones de contraseña
+    else if (cadena.length < 8 && operacion == 2) {
+      return 'Debe tener al menos 8 caracteres';
+    } else if (!RegExp(r'[A-Z]').hasMatch(cadena) && operacion == 2) {
+      return 'Debe incluir al menos una letra mayúscula';
+    } else if (!RegExp(r'[a-z]').hasMatch(cadena) && operacion == 2) {
+      return 'Debe incluir al menos una letra minúscula';
+    } else if (!RegExp(r'[0-9]').hasMatch(cadena) && operacion == 2) {
+      return 'Debe incluir al menos un número';
+    } else if (!RegExp(r'[!@#$%^&*(),.?":{}|<>_-]').hasMatch(cadena) &&
+        operacion == 2) {
+      return 'Debe incluir al menos un carácter especial';
+    }
+    //Validaciones de nombre y apellido
+    else if (!RegExp(r'^[a-zA-ZÁÉÍÓÚáéíóú]+$').hasMatch(cadena) &&
+        (operacion == 3)) {
+      return 'Solo se permiten letras';
+    }
+    //Validaciones de nombre y apellido
+    else if (!RegExp(r'^[A-Z]').hasMatch(cadena) && operacion == 3) {
+      return 'La primera letra debe estar en mayúscula';
+    }
+    //Validaciones de nombre, apellido, nombre de usuario y descripción
+    else if (RegExp(r'[a-zA-Z]').allMatches(cadena).length < 3 &&
+        (operacion == 1 || operacion == 3 || operacion == 4)) {
+      return 'Debe incluir al menos 3 letras';
+    }
+
+    return "";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,18 +112,23 @@ class _SignUpState extends State<SignUp> {
                   // Usuario
                   Container(
                     margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: Color.fromRGBO(11, 131, 125, 0.2),
                     ),
                     child: TextFormField(
+                      maxLength: 16,
                       controller: usernameController,
                       validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Usuario no puede estar vacío";
+                        String resultado_contra = Validaciones(value!, 1);
+                        if (resultado_contra == "") {
+                          return null;
                         }
-                        return null;
+                        return resultado_contra;
                       },
                       decoration: const InputDecoration(
                         icon: Icon(Icons.person),
@@ -77,18 +141,23 @@ class _SignUpState extends State<SignUp> {
                   // Contraseña
                   Container(
                     margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: Color.fromRGBO(11, 131, 125, 0.3),
                     ),
                     child: TextFormField(
+                      maxLength: 20,
                       controller: passwordController,
                       validator: (value) {
-                        if (value!.isEmpty) {
-                          return "La contraseña no puede estar vacía";
+                        String resultado_contra = Validaciones(value!, 2);
+                        if (resultado_contra == "") {
+                          return null;
                         }
-                        return null;
+                        return resultado_contra;
                       },
                       obscureText: isPasswordVisible,
                       decoration: InputDecoration(
@@ -97,7 +166,9 @@ class _SignUpState extends State<SignUp> {
                         hintText: "Contraseña",
                         suffixIcon: IconButton(
                           icon: Icon(
-                            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                           ),
                           onPressed: () {
                             setState(() {
@@ -112,17 +183,22 @@ class _SignUpState extends State<SignUp> {
                   // Confirmar Contraseña
                   Container(
                     margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: Color.fromRGBO(11, 131, 125, 0.3),
                     ),
                     child: TextFormField(
+                      maxLength: 20,
                       controller: confirmPasswordController,
                       validator: (value) {
                         if (value!.isEmpty) {
                           return "La contraseña no puede estar vacía";
-                        } else if (passwordController.text != confirmPasswordController.text) {
+                        } else if (passwordController.text !=
+                            confirmPasswordController.text) {
                           return "Las contraseñas no coinciden";
                         }
                         return null;
@@ -134,7 +210,9 @@ class _SignUpState extends State<SignUp> {
                         hintText: "Confirmar Contraseña",
                         suffixIcon: IconButton(
                           icon: Icon(
-                            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                           ),
                           onPressed: () {
                             setState(() {
@@ -149,18 +227,23 @@ class _SignUpState extends State<SignUp> {
                   // Nombre
                   Container(
                     margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: Color.fromRGBO(11, 131, 125, 0.2),
                     ),
                     child: TextFormField(
+                      maxLength: 16,
                       controller: nameController,
                       validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Nombre no puede estar vacío";
+                        String resultado_contra = Validaciones(value!, 3);
+                        if (resultado_contra == "") {
+                          return null;
                         }
-                        return null;
+                        return resultado_contra;
                       },
                       decoration: const InputDecoration(
                         icon: Icon(Icons.account_circle),
@@ -173,18 +256,23 @@ class _SignUpState extends State<SignUp> {
                   // Apellido
                   Container(
                     margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: Color.fromRGBO(11, 131, 125, 0.2),
                     ),
                     child: TextFormField(
+                      maxLength: 16,
                       controller: surnameController,
                       validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Apellido no puede estar vacío";
+                        String resultado_contra = Validaciones(value!, 3);
+                        if (resultado_contra == "") {
+                          return null;
                         }
-                        return null;
+                        return resultado_contra;
                       },
                       decoration: const InputDecoration(
                         icon: Icon(Icons.arrow_forward),
@@ -197,18 +285,23 @@ class _SignUpState extends State<SignUp> {
                   // Descripción
                   Container(
                     margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: Color.fromRGBO(11, 131, 125, 0.2),
                     ),
                     child: TextFormField(
+                      maxLength: 40,
                       controller: descriptionController,
                       validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Descripción no puede estar vacía";
+                        String resultado_contra = Validaciones(value!, 4);
+                        if (resultado_contra == "") {
+                          return null;
                         }
-                        return null;
+                        return resultado_contra;
                       },
                       decoration: const InputDecoration(
                         icon: Icon(Icons.add_reaction),
@@ -221,7 +314,10 @@ class _SignUpState extends State<SignUp> {
                   // Género
                   Container(
                     margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       color: Color.fromRGBO(11, 131, 125, 0.2),
@@ -233,17 +329,28 @@ class _SignUpState extends State<SignUp> {
                         border: InputBorder.none,
                       ),
                       items: const [
-                        DropdownMenuItem(child: Text("Masculino"), value: "Masculino"),
-                        DropdownMenuItem(child: Text("Femenino"), value: "Femenino"),
+                        DropdownMenuItem(
+                          child: Text("Masculino"),
+                          value: "Masculino",
+                        ),
+                        DropdownMenuItem(
+                          child: Text("Femenino"),
+                          value: "Femenino",
+                        ),
                       ],
                       onChanged: (value) {
                         setState(() {
                           selectedGender = value;
                         });
                       },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor selecciona una opción';
+                        }
+                        return null;
+                      },
                     ),
                   ),
-
                   // Botón de Registro
                   Container(
                     height: 55,
@@ -255,26 +362,42 @@ class _SignUpState extends State<SignUp> {
                     child: TextButton(
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          // Crear el usuario
-                          Users newUser = Users(
-                            usernameController.text,
-                            nameController.text,
-                            surnameController.text,
-                            selectedGender ?? "Masculino", // Por defecto Masculino
-                            passwordController.text,
-                            descriptionController.text,
-                          );
+                          //Verificar que el usuario existe en la base de datos
+                          await _verificarUsuario(usernameController.text);
 
-                          // Insertar el usuario en la base de datos
-                          await _userQuery.insertUser(newUser);
+                          setState(() {});
 
-                          // Navegar a la pantalla de login después de registrar
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginScreen(),
-                            ),
-                          );
+                          if (resultado == true) {
+                            resultado =
+                                false; // Restablecer la variable después de usarla
+
+                            // Crear el usuario
+                            Users newUser = Users(
+                              usernameController.text,
+                              nameController.text,
+                              surnameController.text,
+                              selectedGender ??
+                                  "Masculino", // Por defecto Masculino
+                              passwordController.text,
+                              descriptionController.text,
+                            );
+
+                            // Insertar el usuario en la base de datos
+                            await _userQuery.insertUser(newUser);
+
+                            // Navegar a la pantalla de login después de registrar
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen(),
+                              ),
+                            );
+                          } else {
+                            setState(() {
+                              Verificar_usuario =
+                                  true; // Muestra mensaje de error
+                            });
+                          }
                         }
                       },
                       child: const Text(
@@ -283,6 +406,31 @@ class _SignUpState extends State<SignUp> {
                       ),
                     ),
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("¿Ya tienes una cuenta?"),
+                      TextButton(
+                        onPressed: () {
+                          //Navigate to sign up
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text("Iniciar Sesión"),
+                      ),
+                    ],
+                  ),
+
+                  Verificar_usuario
+                      ? const Text(
+                        "El nombre de usuario ya existe.",
+                        style: TextStyle(color: Colors.red),
+                      )
+                      : const SizedBox(),
                 ],
               ),
             ),
