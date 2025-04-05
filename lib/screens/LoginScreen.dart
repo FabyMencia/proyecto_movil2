@@ -35,7 +35,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _userLogin(String usuario, String contra) async {
     var User_L = (await _UserQuery.validateUser(usuario, contra))?.toMap();
-
     if ((User_L?['userid'] == usuario) && (User_L?['password'] == contra)) {
       resultado = true;
       limpiarTxt();
@@ -79,6 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Color.fromRGBO(11, 131, 125, 0.2),
                       ),
                       child: TextFormField(
+                        maxLength: 16,
                         controller: username,
                         validator: (value) {
                           if (value!.isEmpty) {
@@ -106,6 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Color.fromRGBO(11, 131, 125, 0.3),
                       ),
                       child: TextFormField(
+                        maxLength: 20,
                         controller: password,
                         validator: (value) {
                           if (value!.isEmpty) {
@@ -148,10 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: TextButton(
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            await _userLogin(
-                              username.text,
-                              password.text,
-                            ); 
+                            await _userLogin(username.text, password.text);
 
                             setState(
                               () {},
@@ -187,7 +185,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         const Text("¿No tienes una cuenta?"),
                         TextButton(
                           onPressed: () {
-                            //Navigate to sign up
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -200,7 +197,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
 
-                    // We will disable this message in default, when user and pass is incorrect we will trigger this message to user
                     Inicio
                         ? const Text(
                           "Usuario o contraseña incorrectos",
