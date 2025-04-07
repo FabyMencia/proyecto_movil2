@@ -17,7 +17,7 @@ class _BibliotecaScreenState extends State<BibliotecaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _buildBibliotecaPage(),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 1),
+      bottomNavigationBar: CustomBottomNavBar(currentIndex: 1,currentuser: widget.userId,),
     );
   }
 

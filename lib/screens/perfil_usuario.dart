@@ -103,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               : user == null
               ? _buildErrorState()
               : _buildProfileContent(),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 4),
+      bottomNavigationBar: CustomBottomNavBar(currentIndex: 4,currentuser: widget.userId,),
     );
   }
 

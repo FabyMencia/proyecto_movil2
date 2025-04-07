@@ -148,7 +148,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
                   },
                 ),
               ),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 3),
+      bottomNavigationBar:  CustomBottomNavBar(currentIndex: 3,currentuser: widget.userId,),
     );
   }
 

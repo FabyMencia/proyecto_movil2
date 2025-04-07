@@ -18,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   var _datosUsuario;
   bool _isLoading = true;
   String _errorMessage = '';
-
+String inputText = '';
   //Text Editing Controller
   final username = TextEditingController();
   final password = TextEditingController();
@@ -37,6 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
     var User_L = (await _UserQuery.validateUser(usuario, contra))?.toMap();
     if ((User_L?['userid'] == usuario) && (User_L?['password'] == contra)) {
       resultado = true;
+     inputText = username.text;
       limpiarTxt();
     } else {
       resultado = false;
@@ -161,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const Home_screen(),
+                                  builder: (context) => Home_screen(userid: inputText),
                                 ),
                               );
                             } else {

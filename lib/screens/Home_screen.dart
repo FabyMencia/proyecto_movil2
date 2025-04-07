@@ -3,9 +3,15 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:proyecto_libreria/screens/custom_navbar.dart';
 import 'package:proyecto_libreria/screens/Busqueda_screen.dart';
 
-class Home_screen extends StatelessWidget {
-  const Home_screen({Key? key}) : super(key: key);
+class Home_screen extends StatefulWidget {
+  final String userid;
+  const Home_screen({super.key, required this.userid});
 
+  @override
+  State<Home_screen> createState() => Home_screenState();
+}
+
+class Home_screenState extends State<Home_screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,7 +147,10 @@ class Home_screen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 0,
+        currentuser: widget.userid,
+      ),
     );
   }
 
@@ -162,7 +171,7 @@ class Home_screen extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder:
-                (context) => Busqueda_screen(selectedCategoryId: categoryId),
+                (context) => Busqueda_screen(selectedCategoryId: categoryId,currentuser: widget.userid,),
           ),
         );
       },

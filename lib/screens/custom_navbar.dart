@@ -7,8 +7,8 @@ import 'package:proyecto_libreria/screens/perfil_usuario.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
-
-  const CustomBottomNavBar({Key? key, required this.currentIndex})
+  final String currentuser;
+  const CustomBottomNavBar({Key? key, required this.currentIndex,required this.currentuser})
     : super(key: key);
 
   void _navigate(BuildContext context, int index) {
@@ -17,19 +17,19 @@ class CustomBottomNavBar extends StatelessWidget {
     Widget nextScreen;
     switch (index) {
       case 0:
-        nextScreen = const Home_screen();
+        nextScreen = Home_screen(userid: currentuser,);
         break;
       case 1:
-        nextScreen = const BibliotecaScreen(userId: 'user1');
+        nextScreen =  BibliotecaScreen(userId: currentuser);
         break;
       case 2:
-        nextScreen = const Busqueda_screen();
+        nextScreen =  Busqueda_screen(currentuser: currentuser,);
         break;
       case 3:
-        nextScreen = const FavoritosScreen(userId: 'user1');
+        nextScreen =  FavoritosScreen(userId: currentuser);
         break;
       case 4:
-        nextScreen = const ProfileScreen(userId: 'user1');
+        nextScreen =  ProfileScreen(userId: currentuser);
         break;
       default:
         return;
