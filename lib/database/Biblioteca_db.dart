@@ -120,8 +120,8 @@ class BibliotecaDb {
       await db.insert(
         'lecturas', 
         {
-          'user_id': userId,
-          'libro_id': libroId,
+          'id_usuario': userId,
+          'id_libro': libroId,
         },
         conflictAlgorithm: ConflictAlgorithm.replace, 
       );

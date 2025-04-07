@@ -6,7 +6,7 @@ import 'package:proyecto_libreria/database/Databasehelper.dart';
 class BibliotecaScreen extends StatefulWidget {
   final String userId;
 
-  const BibliotecaScreen({Key? key, required this.userId});
+  const BibliotecaScreen({super.key, required this.userId});
 
   @override
   _BibliotecaScreenState createState() => _BibliotecaScreenState();
@@ -17,7 +17,10 @@ class _BibliotecaScreenState extends State<BibliotecaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _buildBibliotecaPage(),
-      bottomNavigationBar: CustomBottomNavBar(currentIndex: 1,currentuser: widget.userId,),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 1,
+        currentuser: widget.userId,
+      ),
     );
   }
 
@@ -62,7 +65,7 @@ class _BibliotecaScreenState extends State<BibliotecaScreen> {
 class LecturasPage extends StatelessWidget {
   final String userId;
 
-  const LecturasPage({Key? key, required this.userId}) : super(key: key);
+  const LecturasPage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -74,33 +77,42 @@ class LecturasPage extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: BibliotecaDb().getUserLecturas(userId),
-        builder: (BuildContext context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error al cargar lecturas: ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No tienes libros en Lecturas."));
-          } else {
-            List<Map<String, dynamic>> libros = snapshot.data!;
-            return GridView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: libros.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, 
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.6, // Ajusta la relación de aspecto para que las tarjetas tengan el mismo tamaño
-              ),
-              itemBuilder: (BuildContext context, int index) {
-                final libro = libros[index];
-                return libroCard(libro);
-              },
-            );
-          }
-        },
+      body: SafeArea(
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: BibliotecaDb().getUserLecturas(userId),
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text("Error al cargar lecturas: ${snapshot.error}"),
+              );
+            } else {
+              List<Map<String, dynamic>> librosGuardados = snapshot.data ?? [];
+
+              if (librosGuardados.isEmpty) {
+                return const Center(
+                  child: Text("No tienes libros en Lecturas."),
+                );
+              } else {
+                return GridView.builder(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: librosGuardados.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.6,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    final libro = librosGuardados[index];
+                    return libroCard(libro);
+                  },
+                );
+              }
+            }
+          },
+        ),
       ),
     );
   }
@@ -109,58 +121,60 @@ class LecturasPage extends StatelessWidget {
 Widget libroCard(Map<String, dynamic> libro) {
   return Container(
     margin: const EdgeInsets.only(right: 16),
-    width: 125, 
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          height: 165, 
-          width: 125, 
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black,
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              libro['imagen_libro']!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: const Color(0xFF5E8585), 
-                  child: const Center(
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 40,
-                      color: Colors.white,
+    width: 125,
+    child: SingleChildScrollView(
+      // Wrap the Column in a SingleChildScrollView
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            height: 165,
+            width: 125,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                libro['imagen_libro']!,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: const Color(0xFF5E8585),
+                    child: const Center(
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 40,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 6),
-        // Título del libro
-        Text(
-          libro['titulo']!,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF083332),
-            fontSize: 13,
+          const SizedBox(height: 6),
+          Text(
+            libro['titulo']!,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF083332),
+              fontSize: 13,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 1),
-      ],
+          const SizedBox(height: 1),
+        ],
+      ),
     ),
   );
 }
@@ -186,11 +200,16 @@ class ColeccionesPage extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text("Error al cargar colecciones: ${snapshot.error}"));
+            return Center(
+              child: Text("Error al cargar colecciones: ${snapshot.error}"),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No tienes libros guardados en categorías."));
+            return const Center(
+              child: Text("No tienes libros guardados en categorías."),
+            );
           } else {
-            Map<String, List<Map<String, dynamic>>> colecciones = snapshot.data!;
+            Map<String, List<Map<String, dynamic>>> colecciones =
+                snapshot.data!;
             return GridView.builder(
               padding: const EdgeInsets.all(10),
               itemCount: colecciones.keys.length,
@@ -201,7 +220,8 @@ class ColeccionesPage extends StatelessWidget {
               ),
               itemBuilder: (BuildContext context, int index) {
                 String categoria = colecciones.keys.elementAt(index);
-                List<Map<String, dynamic>> libros = colecciones[categoria] ?? [];
+                List<Map<String, dynamic>> libros =
+                    colecciones[categoria] ?? [];
                 return categoriaCard(context, categoria, libros);
               },
             );
@@ -211,7 +231,11 @@ class ColeccionesPage extends StatelessWidget {
     );
   }
 
-  Widget categoriaCard(BuildContext context, String categoria, List<Map<String, dynamic>> libros) {
+  Widget categoriaCard(
+    BuildContext context,
+    String categoria,
+    List<Map<String, dynamic>> libros,
+  ) {
     return GestureDetector(
       onTap: () {
         showBottomSheetLibros(context, categoria, libros);
@@ -237,10 +261,7 @@ class ColeccionesPage extends StatelessWidget {
             const SizedBox(height: 5),
             Text(
               "${libros.length} libros",
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.black54),
               textAlign: TextAlign.center,
             ),
           ],
@@ -250,7 +271,11 @@ class ColeccionesPage extends StatelessWidget {
   }
 }
 
-void showBottomSheetLibros(BuildContext context, String categoria, List<Map<String, dynamic>> libros) {
+void showBottomSheetLibros(
+  BuildContext context,
+  String categoria,
+  List<Map<String, dynamic>> libros,
+) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
@@ -265,15 +290,18 @@ void showBottomSheetLibros(BuildContext context, String categoria, List<Map<Stri
             ),
             const SizedBox(height: 10),
             Expanded(
-              child: libros.isEmpty
-                  ? const Center(child: Text("No hay libros en esta categoría."))
-                  : ListView.builder(
-                      itemCount: libros.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final libro = libros[index];
-                        return libroCard(libro); 
-                      },
-                    ),
+              child:
+                  libros.isEmpty
+                      ? const Center(
+                        child: Text("No hay libros en esta categoría."),
+                      )
+                      : ListView.builder(
+                        itemCount: libros.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final libro = libros[index];
+                          return libroCard(libro);
+                        },
+                      ),
             ),
           ],
         ),
@@ -282,12 +310,10 @@ void showBottomSheetLibros(BuildContext context, String categoria, List<Map<Stri
   );
 }
 
-
-//Estructura de Proximos
 class ProximosPage extends StatefulWidget {
   final String userId;
 
-  ProximosPage({required this.userId});
+  ProximosPage({super.key, required this.userId});
 
   @override
   _ProximosPageState createState() => _ProximosPageState();
@@ -303,17 +329,19 @@ class _ProximosPageState extends State<ProximosPage> {
   }
 
   Future<void> agregarALecturas(Map<String, dynamic> libro) async {
-  try {
-    print("Agregando libro: ${libro['titulo']}");
-    await BibliotecaDb().agregarLibro(widget.userId, libro[DatabaseHelper.colIdLibro]);
-    setState(() {
-      // Actualiza la lista de libros futuros
-      librosFuturos = BibliotecaDb().getLibrosNoAgregados(widget.userId);
-    });
-  } catch (e) {
-    print("Error al agregar libro: $e");
+    try {
+      print("Agregando libro: ${libro['titulo']}");
+      await BibliotecaDb().agregarLibro(
+        widget.userId,
+        libro[DatabaseHelper.colIdLibro],
+      ); // Agregar el libro a la lista de guardados
+      setState(() {
+        librosFuturos = BibliotecaDb().getLibrosNoAgregados(widget.userId);
+      });
+    } catch (e) {
+      print("Error al agregar libro: $e");
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -327,107 +355,36 @@ class _ProximosPageState extends State<ProximosPage> {
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: librosFuturos,
-        builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+        builder: (BuildContext context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text("Error al cargar recomendaciones: ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No hay recomendaciones disponibles."));
-          } else {
-            List<Map<String, dynamic>> libros = snapshot.data!;
-            return SingleChildScrollView( 
-              child: Column(
-                children: [
-                  GridView.builder(
-                    padding: const EdgeInsets.all(10),
-                    itemCount: libros.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3, 
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 20,
-                      childAspectRatio: 0.6, 
-                    ),
-                    shrinkWrap: true, 
-                    physics: const NeverScrollableScrollPhysics(), 
-                    itemBuilder: (BuildContext context, int index) {
-                      final libro = libros[index];
-                      return ProximosCard(libro, agregarALecturas);
-                    },
-                  ),
-                  const SizedBox(height: 20), 
-                ],
+            return Center(
+              child: Text(
+                "Error al cargar los próximos libros: ${snapshot.error}",
               ),
+            );
+          } else {
+            final libros = snapshot.data ?? [];
+            return ListView.builder(
+              itemCount: libros.length,
+              itemBuilder: (BuildContext context, int index) {
+                final libro = libros[index];
+                return Card(
+                  child: ListTile(
+                    title: Text(libro['titulo'] ?? "Sin título"),
+                    subtitle: Text(libro['descripcion'] ?? "Sin descripción"),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.bookmark_add),
+                      onPressed: () => agregarALecturas(libro),
+                    ),
+                  ),
+                );
+              },
             );
           }
         },
       ),
     );
   }
-}
-
-Widget ProximosCard(Map<String, dynamic> libro, Function(Map<String, dynamic>) onAdd) {
-  return GestureDetector(
-    onTap: () {
-      // mostrar más detalles del libro
-    },
-    child: Container(
-      margin: const EdgeInsets.only(right: 16),
-      width: 125, 
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            height: 165, 
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.network(
-                libro['imagen_libro']!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: const Color(0xFF5E8585), // Color de fondo en caso de error
-                    child: const Center(
-                      child: Icon(
-                        Icons.image_not_supported,
-                        size: 40,
-                        color: Colors.white,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            libro['titulo']!,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF083332),
-              fontSize: 13,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: () => onAdd(libro),
-            child: const Icon(Icons.add),
-          ),
-        ],
-      ),
-    ),
-  );
 }
