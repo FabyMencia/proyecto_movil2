@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:proyecto_libreria/screens/custom_navbar.dart';
 import 'package:proyecto_libreria/database/Biblioteca_db.dart';
 import 'package:proyecto_libreria/database/Databasehelper.dart';
+import 'package:proyecto_libreria/screens/Detalle_libro_screen.dart';
 
 class BibliotecaScreen extends StatefulWidget {
   final String userId;
@@ -106,7 +107,7 @@ class LecturasPage extends StatelessWidget {
                   ),
                   itemBuilder: (BuildContext context, int index) {
                     final libro = librosGuardados[index];
-                    return libroCard(libro);
+                    return libroCard(context, libro, userId);
                   },
                 );
               }
@@ -118,62 +119,76 @@ class LecturasPage extends StatelessWidget {
   }
 }
 
-Widget libroCard(Map<String, dynamic> libro) {
-  return Container(
-    margin: const EdgeInsets.only(right: 16),
-    width: 125,
-    child: SingleChildScrollView(
-      // Wrap the Column in a SingleChildScrollView
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            height: 165,
-            width: 125,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.network(
-                libro['imagen_libro']!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: const Color(0xFF5E8585),
-                    child: const Center(
-                      child: Icon(
-                        Icons.image_not_supported,
-                        size: 40,
-                        color: Colors.white,
+Widget libroCard(BuildContext context, Map<String, dynamic> libro, String userId) {
+  return GestureDetector(
+    onTap: () {
+      // Navegar a la pantalla de detalles del libro al hacer clic
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DetalleLibroScreen(
+            libroId: libro['id_libro'],
+            userId: userId,
+          ),
+        ),
+      );
+    },
+    child: Container(
+      margin: const EdgeInsets.only(right: 16),
+      width: 125,
+      child: SingleChildScrollView(
+        // Wrap the Column in a SingleChildScrollView
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: 165,
+              width: 125,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  libro['imagen_libro']!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: const Color(0xFF5E8585),
+                      child: const Center(
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 40,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            libro['titulo']!,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF083332),
-              fontSize: 13,
+            const SizedBox(height: 6),
+            Text(
+              libro['titulo']!,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF083332),
+                fontSize: 13,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 1),
-        ],
+            const SizedBox(height: 1),
+          ],
+        ),
       ),
     ),
   );
@@ -222,7 +237,7 @@ class ColeccionesPage extends StatelessWidget {
                 String categoria = colecciones.keys.elementAt(index);
                 List<Map<String, dynamic>> libros =
                     colecciones[categoria] ?? [];
-                return categoriaCard(context, categoria, libros);
+                return categoriaCard(context, categoria, libros, userId);
               },
             );
           }
@@ -235,10 +250,11 @@ class ColeccionesPage extends StatelessWidget {
     BuildContext context,
     String categoria,
     List<Map<String, dynamic>> libros,
+    String userId,
   ) {
     return GestureDetector(
       onTap: () {
-        showBottomSheetLibros(context, categoria, libros);
+        showBottomSheetLibros(context, categoria, libros, userId);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -275,6 +291,7 @@ void showBottomSheetLibros(
   BuildContext context,
   String categoria,
   List<Map<String, dynamic>> libros,
+  String userId,
 ) {
   showModalBottomSheet(
     context: context,
@@ -299,7 +316,24 @@ void showBottomSheetLibros(
                         itemCount: libros.length,
                         itemBuilder: (BuildContext context, int index) {
                           final libro = libros[index];
-                          return libroCard(libro);
+                          return GestureDetector(
+                            onTap: () {
+                              // Cerrar el bottom sheet
+                              Navigator.pop(context);
+                              
+                              // Navegar a la pantalla de detalles
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetalleLibroScreen(
+                                    libroId: libro['id_libro'],
+                                    userId: userId,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: libroCard(context, libro, userId),
+                          );
                         },
                       ),
             ),
@@ -378,6 +412,18 @@ class _ProximosPageState extends State<ProximosPage> {
                       icon: const Icon(Icons.bookmark_add),
                       onPressed: () => agregarALecturas(libro),
                     ),
+                    onTap: () {
+                      // Navegar a la pantalla de detalles al hacer clic
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetalleLibroScreen(
+                            libroId: libro['id_libro'],
+                            userId: widget.userId,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
@@ -388,3 +434,4 @@ class _ProximosPageState extends State<ProximosPage> {
     );
   }
 }
+
