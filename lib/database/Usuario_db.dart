@@ -20,8 +20,7 @@ class UsuarioDB {
       DatabaseHelper.colNombre: user.nombre,
       DatabaseHelper.colApellido: user.apellido,
       DatabaseHelper.colDescripcionUsuario: user.descripcion,
-      DatabaseHelper.colIdGenero:
-          1, // Por defecto, ya que user.genero es String
+      DatabaseHelper.colIdGenero: int.parse(user.genero), // Por defecto, ya que user.genero es String
       DatabaseHelper.colPassword: user.password,
     };
     return await db.insert(DatabaseHelper.usuarioTable, map);
