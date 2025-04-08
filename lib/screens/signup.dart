@@ -44,8 +44,9 @@ class _SignUpState extends State<SignUp> {
     if (cadena.isEmpty) {
       return 'No puede estar vacío';
     } else if ((cadena.trim().isEmpty ||
-        RegExp(r'^\s|\s$').hasMatch(cadena) ||
-        cadena.contains(' ')) && operacion != 4) {
+            RegExp(r'^\s|\s$').hasMatch(cadena) ||
+            cadena.contains(' ')) &&
+        operacion != 4) {
       return 'No puede se permiten espacios en blanco';
     }
     //Validaciones Usuario
@@ -331,11 +332,11 @@ class _SignUpState extends State<SignUp> {
                       items: const [
                         DropdownMenuItem(
                           child: Text("Masculino"),
-                          value: "Masculino",
+                          value: '1',
                         ),
                         DropdownMenuItem(
                           child: Text("Femenino"),
-                          value: "Femenino",
+                          value: '2',
                         ),
                       ],
                       onChanged: (value) {
@@ -376,8 +377,7 @@ class _SignUpState extends State<SignUp> {
                               usernameController.text,
                               nameController.text,
                               surnameController.text,
-                              selectedGender ??
-                                  "Masculino", // Por defecto Masculino
+                              selectedGender!,
                               passwordController.text,
                               descriptionController.text,
                             );
